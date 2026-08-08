@@ -1,0 +1,76 @@
+```
+# Dependencies
+node_modules/
+
+# Build artifacts
+dist/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Package lock
+package-lock.json
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Compiled
+*.o
+*.obj
+*.out
+*.exe
+*.dll
+*.so
+*.a
+
+# Compressed
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+
+```
