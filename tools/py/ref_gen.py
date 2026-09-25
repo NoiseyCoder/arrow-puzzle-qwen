@@ -117,8 +117,8 @@ def try_build(rng, w, h, mask, total_mask, maxArrows, minFill, maxFill, lmin, lm
     occ = [[False]*w for _ in range(h)]
     owner = [[-1]*w for _ in range(h)]   # cell -> arrow index occupying it, -1 if free
     arrows = []
-    fill_lo = int(total_mask * minFill)
-    fill_hi = int(total_mask * maxFill)
+    fill_lo = int(total_mask * minFill + 0.5)
+    fill_hi = int(total_mask * maxFill + 0.5)
     filled = 0
     guard = 0
     hard_cap = maxArrows * 2
@@ -233,21 +233,19 @@ def greedy_free(arrows, active, w, h):
     for i in active:
         for (x, y) in arrows[i]:
             occ[(x, y)] = i
-    best = None; bestCnt = 10**9
     for i in active:
         p = arrows[i]
         hx, hy = p[-1]; last = p[-2]
         dx, dy = sign(hx-last[0]), sign(hy-last[1])
         rx, ry = hx+dx, hy+dy
-        ok = True; cnt = 0
+        ok = True
         while 0 <= rx < w and 0 <= ry < h:
             j = occ.get((rx, ry))
             if j is not None and j != i: ok = False; break
             rx += dx; ry += dy
         if ok:
-            # count how many cells this arrow's ray passes (proxy for future blocking power)
-            if cnt < bestCnt: bestCnt = cnt; best = i
-    return best
+            return i   # fixed iteration order (ascending id among actives) => deterministic
+    return None
 
 def sign(v): return (v > 0) - (v < 0)
 
@@ -267,16 +265,20 @@ def difficulty(arrows, w, h):
         seen = set()
         while 0 <= rx < w and 0 <= ry < h:
             j = occ.get((rx, ry))
-            if j is not None and j != i and j < i and j not in seen:
+            if j is not None and j != i and j not in seen:
                 seen.add(j); deps[i].append(j)
             rx += dx; ry += dy
     memo = [-1]*n
+    visiting = [False]*n
     def calc(i):
         if memo[i] >= 0: return memo[i]
+        if visiting[i]: return 0   # cycle guard (defensive; generated boards are acyclic)
+        visiting[i] = True
         m = 0
         for j in deps[i]:
             v = calc(j) + 1
             if v > m: m = v
+        visiting[i] = False
         memo[i] = m
         return m
     longest = 0
@@ -309,7 +311,6 @@ if __name__ == "__main__":
         s ^= (s >> 15); s = (s * 2246822519) & U
         s ^= (s >> 13); s = (s * 3266489917) & U
         s ^= (s >> 16)
-        rng = Mulberry32(s)
         rng = Mulberry32(s)
         arrows, ro, w, h = generate(n, rng)
         out.append("%d %dx%d %d %s" % (n, w, h, len(arrows), content_hash(arrows, w, h)))
